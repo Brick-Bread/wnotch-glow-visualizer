@@ -1,0 +1,43 @@
+{
+  "id": "brick-bread.glow-visualizer",
+  "name": "Glow visualizer",
+  "version": "1.0.0",
+  "author": "Brick_Bread",
+  "description": "Turns the glow around the pill into a music visualiser, with a choice of animations.",
+  "assembly": "GlowVisualizer.dll",
+  "apiVersion": 7,
+  "repository": "Brick-Bread/wnotch-glow-visualizer",
+  "permissions": [ "audio" ],
+  "settings": [
+    {
+      "key": "style",
+      "label": "Animation",
+      "type": "choice",
+      "options": [ "Auto", "Pulse", "Spectrum", "Mirror", "Wave", "Comet", "Fire", "Strobe", "Aurora" ],
+      "description": "Auto changes the animation every so often. Fire uses its own colours."
+    },
+    {
+      "key": "palette",
+      "label": "Colours",
+      "type": "choice",
+      "options": [ "Rainbow", "Accent", "Blue", "Cyan", "Green", "Yellow", "Amber", "Orange", "Red", "Violet", "White" ],
+      "description": "Accent uses the accent colour chosen in Notch's settings."
+    },
+    {
+      "key": "sensitivity",
+      "label": "Sensitivity (%)",
+      "type": "number",
+      "min": 25,
+      "max": 300,
+      "step": 5,
+      "description": "Turn it up for quiet music, down if the glow stays at full brightness."
+    },
+    {
+      "key": "cycleSeconds",
+      "label": "Auto: change every (seconds)",
+      "type": "number",
+      "min": 5,
+      "max": 300
+    }
+  ]
+}
