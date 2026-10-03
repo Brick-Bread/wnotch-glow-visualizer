@@ -16,9 +16,16 @@ A plugin for [Brick-Bread/WNotch](https://github.com/Brick-Bread/WNotch) that tu
 | **Aurora** | Slow curtains of colour drifting along the pill. |
 | **Auto** | Goes through all of them, changing every so often. |
 
+## Follows the track's EQ
+
+Two things respond to the balance of bass, mids and treble in what is playing:
+
+- **The shape.** Each pitch band is judged against its own recent peak, so a quiet treble band moves as much as a loud bass one and you see the track's whole EQ profile, not just its bass. The **EQ balance** option sets how much (0 is each pitch at its true loudness).
+- **The colour.** With the rainbow palette, the hue follows where the weight of the sound sits: bass-heavy music glows red and orange, bright music green through violet, and it shifts as the track's mood does.
+
 ## Options
 
-Under the plugin in WNotch Settings: the animation, the colours (rainbow, your accent colour, or one colour), the sensitivity (turn it up for quiet music, down if the glow sticks at full brightness) and, for Auto, how often it changes. Changes apply at once.
+Under the plugin in WNotch Settings: the animation, the colours (rainbow, your accent colour, or one colour), the EQ balance, the sensitivity (turn it up for quiet music, down if the glow sticks at full brightness) and, for Auto, how often it changes. Changes apply at once.
 
 ## Install
 

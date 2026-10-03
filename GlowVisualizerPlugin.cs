@@ -28,6 +28,7 @@ public sealed class GlowVisualizerPlugin : INotchPlugin
     private string _styleName = AutoName;
     private Palette _palette = Palette.Rainbow;
     private double _sensitivity = 1;
+    private double _balance = 0.6;
     private double _cycleSeconds = 20;
     private int _autoIndex;
     private double _autoTime;
@@ -43,6 +44,7 @@ public sealed class GlowVisualizerPlugin : INotchPlugin
         host.Settings.Set("style", host.Settings.Get("style", AutoName));
         host.Settings.Set("palette", host.Settings.Get("palette", "Rainbow"));
         host.Settings.Set("sensitivity", host.Settings.Get("sensitivity", 100));
+        host.Settings.Set("balance", host.Settings.Get("balance", 60));
         host.Settings.Set("cycleSeconds", host.Settings.Get("cycleSeconds", 20));
         LoadOptions();
 
@@ -92,6 +94,7 @@ public sealed class GlowVisualizerPlugin : INotchPlugin
         string style = host.Settings.Get("style", AutoName) ?? AutoName;
         string palette = host.Settings.Get("palette", "Rainbow") ?? "Rainbow";
         double sensitivity = Math.Clamp(host.Settings.Get("sensitivity", 100), 25, 300) / 100.0;
+        double balance = Math.Clamp(host.Settings.Get("balance", 60), 0, 100) / 100.0;
         double cycle = Math.Clamp(host.Settings.Get("cycleSeconds", 20), 5, 300);
 
         lock (_gate)
@@ -99,6 +102,7 @@ public sealed class GlowVisualizerPlugin : INotchPlugin
             _styleName = style;
             _palette = Palette.Named(palette, host.Shell.Accent);
             _sensitivity = sensitivity;
+            _balance = balance;
             _cycleSeconds = cycle;
         }
     }
@@ -136,7 +140,7 @@ public sealed class GlowVisualizerPlugin : INotchPlugin
         _last = now;
 
         AudioFrame audio = host.Audio.Latest;
-        _signal.Update(audio, dt, _sensitivity);
+        _signal.Update(audio, dt, _sensitivity, _balance);
 
         _silentFor = audio.Level < 0.02 ? _silentFor + dt : 0;
         if (_silentFor > SilenceBeforeRelease && _signal.Energy < 0.02)

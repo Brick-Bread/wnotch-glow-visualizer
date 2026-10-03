@@ -30,7 +30,7 @@ internal static class Styles
             double level = Math.Clamp((s.Bass * 0.6) + (s.Energy * 0.3) + (s.Kick * 0.4), 0, 1);
             return new GlowFrame
             {
-                Color = palette.At(0.5, s.Time * 0.04),
+                Color = palette.At(0.25, s.ToneHue),
                 Intensity = 0.15 + (0.85 * level),
                 Reach = 0.8 + (0.9 * level),
             };
@@ -96,7 +96,7 @@ internal static class Styles
             {
                 double x = i / (double)(Count - 1);
                 double ripple = 0.5 + (0.5 * Math.Sin(2 * Math.PI * ((x * 1.4) - _phase)));
-                segments[i] = new GlowSegment(palette.At(x * 0.6, _phase * 0.08), 0.08 + (0.92 * level * ripple));
+                segments[i] = new GlowSegment(palette.At(x * 0.5, s.ToneHue + (_phase * 0.03)), 0.08 + (0.92 * level * ripple));
             }
 
             return new GlowFrame { Segments = segments, Reach = 1 + (0.5 * level) };
@@ -132,7 +132,7 @@ internal static class Styles
                 double reach = Math.Abs(i - head) <= 1 ? 1 : 0;
                 _trail[i] = Math.Max(_trail[i], reach * Math.Clamp(0.45 + (0.4 * s.Energy) + (0.3 * s.Kick), 0, 1));
                 double x = i / (double)(Count - 1);
-                segments[i] = new GlowSegment(palette.At(x, s.Time * 0.03), 0.04 + (0.96 * _trail[i]));
+                segments[i] = new GlowSegment(palette.At(x * 0.6, s.ToneHue), 0.04 + (0.96 * _trail[i]));
             }
 
             return new GlowFrame { Segments = segments, Reach = 1 + (0.4 * s.Kick) };
@@ -192,7 +192,7 @@ internal static class Styles
 
             return new GlowFrame
             {
-                Color = palette.At(_hue - Math.Floor(_hue)),
+                Color = palette.At(_hue - Math.Floor(_hue), s.ToneHue * 0.5),
                 Intensity = 0.08 + (0.92 * Math.Pow(_flash, 1.2)),
                 Reach = 0.8 + (1.2 * _flash),
             };
@@ -214,7 +214,7 @@ internal static class Styles
             {
                 double shimmer = 0.55 + (0.45 * Math.Sin((s.Time * (0.5 + (i * 0.06))) + (i * 1.3)));
                 double hue = 0.5 + (0.5 * Math.Sin((s.Time * 0.18) + (i * 0.4)));
-                segments[i] = new GlowSegment(palette.At(hue, s.Time * 0.01), level * shimmer);
+                segments[i] = new GlowSegment(palette.At(hue * 0.5, s.ToneHue + (s.Time * 0.005)), level * shimmer);
             }
 
             return new GlowFrame { Segments = segments, Reach = 1.2 };

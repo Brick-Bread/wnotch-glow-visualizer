@@ -11,6 +11,13 @@ internal sealed class Signal
 {
     private const double BeatCooldown = 0.2;
 
+    // How long a band's remembered peak takes to fade, so each pitch is judged against the track it is in.
+    private const double PeakMemorySeconds = 8;
+
+    // Peaks below this are not stretched up: a band with nothing in it should stay dark.
+    private const double PeakFloor = 0.3;
+
+    private readonly double[] _peaks = new double[PluginAudio.BandCount];
     private double _bassAverage;
     private double _sinceBeat = 1;
 
@@ -32,6 +39,15 @@ internal sealed class Signal
     /// <summary>The bands of <see cref="AudioFrame.Bands"/>, smoothed, low pitch first.</summary>
     public float[] Bands { get; } = new float[PluginAudio.BandCount];
 
+    /// <summary>
+    /// Where the weight of the sound sits, 0 (all bass) to 1 (all treble), slowly smoothed: the track's EQ
+    /// profile as one number. Bass-heavy music is low, bright music is high.
+    /// </summary>
+    public double Tone { get; private set; } = 0.35;
+
+    /// <summary>The hue (0..1 round the colour wheel) that <see cref="Tone"/> maps to: red for bass-heavy, through green, to violet for bright.</summary>
+    public double ToneHue => Tone * 0.78;
+
     /// <summary>True for the one frame in which a beat (a sudden rise in the bass) was heard.</summary>
     public bool Beat { get; private set; }
 
@@ -39,7 +55,8 @@ internal sealed class Signal
     public double Kick { get; private set; }
 
     /// <summary>Takes in the newest frame. <paramref name="sensitivity"/> is 1 for the levels as they are.</summary>
-    public void Update(AudioFrame audio, double dt, double sensitivity)
+    /// <param name="balance">0 shows each pitch at its true loudness; 1 judges each against its own recent peak, so the whole EQ profile shows, not just the bass.</param>
+    public void Update(AudioFrame audio, double dt, double sensitivity, double balance = 0.6)
     {
         Dt = dt;
         Time += dt;
@@ -49,9 +66,25 @@ internal sealed class Signal
         Bass = Follow(Bass, bass, 30, 6, dt);
         Mid = Follow(Mid, Scale(audio.Mid, sensitivity), 22, 5, dt);
         Treble = Follow(Treble, Scale(audio.Treble, sensitivity), 30, 7, dt);
+        double weight = 0, total = 0;
         for (int i = 0; i < Bands.Length; i++)
         {
-            Bands[i] = (float)Follow(Bands[i], Scale(audio.Bands[i], sensitivity), 34, 6.5, dt);
+            double raw = audio.Bands[i];
+            weight += raw * i;
+            total += raw;
+
+            // Each band against its own recent peak: a quiet treble band then moves as much as a loud bass one.
+            _peaks[i] = Math.Max(raw, _peaks[i] * Math.Exp(-dt / PeakMemorySeconds));
+            double relative = raw / Math.Max(_peaks[i], PeakFloor);
+            double shown = raw + ((Math.Min(1, relative) - raw) * balance);
+            Bands[i] = (float)Follow(Bands[i], Scale(shown, sensitivity), 34, 6.5, dt);
+        }
+
+        // Only when something is playing; in a gap the tone stays where the music left it.
+        if (total > 0.4)
+        {
+            double centroid = weight / total / (Bands.Length - 1);
+            Tone = Follow(Tone, Math.Clamp((centroid - 0.15) / 0.55, 0, 1), 1.5, 1.5, dt);
         }
 
         // A beat is the bass jumping clear of what it has lately been, at most five times a second.
